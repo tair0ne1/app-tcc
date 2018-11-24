@@ -1,0 +1,76 @@
+<div class="widget">
+  <div class="buttons">
+    <input type="button" value="Assemble" class="assembleButton" />
+    <input type="button" value="Run" class="runButton" />
+    <input type="button" value="Reset" class="resetButton" />
+    <input type="button" value="Hexdump" class="hexdumpButton" />
+    <input type="button" value="Disassemble" class="disassembleButton" />
+    <input type="button" value="Notes" class="notesButton" />
+    <button *ngIf="usuarioAutenticado" (click)="salvarCodigo()">Save</button>
+    <button *ngIf="!usuarioAutenticado"  [swal]="autenticado">Save</button>
+    <swal
+      #autenticado
+      title="Você precisa estar autenticado para salvar um jogo!"
+      type="warning"
+      [showCancelButton]="true"
+      [showConfirmButton]="true"
+      [options]="{ cancelButtonText: 'Cancelar', confirmButtonText: 'Fazer Login' }"
+      (confirm)="login()"
+    ></swal>
+  </div>
+
+  <textarea class="code" name="codigo" id="codigo" [(ngModel)]="jogo.codigo" #codigo="ngModel" required>
+  </textarea>
+
+  <canvas class="screen" width="160" height="160"></canvas>
+
+  <div class="debugger">
+    <input type="checkbox" class="debug" name="debug" />
+    <label for="debug">Debugger</label>
+    <div class="minidebugger"></div>
+    <div class="buttons">
+      <input type="button" value="Step" class="stepButton" />
+      <input type="button" value="Jump to..." class="gotoButton" />
+    </div>
+  </div>
+
+  <div class="monitorControls">
+    <label for="monitoring">Monitor</label>
+    <input type="checkbox" class="monitoring" name="monitoring" />
+
+    <label for="start">Start: $</label>
+    <input type="text" value="0" class="start" name="start" />
+    <label for="length">Length: $</label>
+    <input type="text" value="ff" class="length" name="length" />
+  </div>
+
+  <div class="monitor"><pre><code></code></pre></div>
+  Console:
+  <div class="messages"><pre><code></code></pre></div>
+
+  <div class="notes" style="display: none">
+O endereço de memória $fe armazena um novo byte aleatório após cada instrução.
+O endereço de memória $ff armazena o código ascii da última tecla pressionada.<br/>
+Os endereços de memória de $200 até $5ff mapeiam os pixels da tela. Diferentes valores irão
+desenhar diferentes cores.
+<br/>
+Os códigos das cores são:
+<br/>
+$0: Black
+$1: White
+$2: Red
+$3: Cyan
+$4: Purple
+$5: Green
+$6: Blue
+$7: Yellow
+$8: Orange
+$9: Brown
+$a: Light red
+$b: Dark grey
+$c: Grey
+$d: Light green
+$e: Light blue
+$f: Light grey
+    </div>
+</div>

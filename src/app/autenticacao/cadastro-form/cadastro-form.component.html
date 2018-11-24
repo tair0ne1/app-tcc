@@ -1,0 +1,45 @@
+<div class="card">
+  <div class="card-header bg-primary text-light">
+    Cadastre-se
+  </div>
+  <div class="card-body">
+    <form (ngSubmit)="cadastrar()" #cadastroForm="ngForm">
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" [(ngModel)]="usuario.email" #email="ngModel"
+        class="form-control" required minlength="4" />
+
+        <div *ngIf="email.invalid && (email.dirty || email.touched)" class="alert alert-danger mt-2">
+          <div *ngIf="email.errors.required">
+            Ops! Email é um campo obrigatório.
+          </div>
+          <div *ngIf="email.errors.minlength">
+            O email precisa ter no mínimo 4 caracteres.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" name="senha" id="senha" [(ngModel)]="usuario.senha" #senha="ngModel"
+        class="form-control" required minlength="6" />
+
+        <div *ngIf="senha.invalid && (senha.dirty || senha.touched)" class="alert alert-danger mt-2">
+          <div *ngIf="senha.errors.required">
+            Ops! Senha é um campo obrigatório.
+          </div>
+          <div *ngIf="senha.errors.minlength">
+            A senha precisa ter no mínimo 6 caracteres.
+          </div>
+        </div>
+        <label *ngIf="mensagemDeErro !== ''" class="alert alert-danger mt-2">{{ mensagemDeErro }}</label>
+        <label *ngIf="mensagemDeSucesso !== ''" class="success mt-2">{{ mensagemDeSucesso }}</label>
+      </div>
+
+      <a routerLink="/inicio" class="btn btn-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary ml-2" [disabled]="!cadastroForm.form.valid">Cadastrar</button>
+
+    </form>
+  </div>
+</div>

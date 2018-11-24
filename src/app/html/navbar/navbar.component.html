@@ -1,0 +1,17 @@
+<nav class="navbar navbar-dark bg-primary">
+  <div *ngIf="autenticado === true" class="col-md-8">
+    <a routerLink="/inicio" class="navbar-brand text-light">Inicio</a>
+  </div>
+  <div *ngIf="autenticado === false" class="col-md-8">
+    <a routerLink="/inicio" class="navbar-brand text-light">Inicio</a>
+  </div>
+  <div *ngIf="autenticado === true" class="col-md-4">
+    <a routerLink="/jogos/novo" class="navbar-brand text-light">Novo Jogo</a>
+    <a routerLink="/jogos" class="navbar-brand text-light">Meus Jogos</a>
+    <a (click)="sair()" class="btn btn-secondary text-light">Sair</a>
+  </div>
+  <div *ngIf="autenticado === false" class="col-md-4">
+    <a routerLink="/login" class="navbar-brand text-light">Login</a>
+    <a routerLink="/cadastrar" class="navbar-brand text-light">Cadastrar</a>
+  </div>
+</nav>
