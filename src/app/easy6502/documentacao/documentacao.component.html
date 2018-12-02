@@ -1,0 +1,72 @@
+<h2>Introdução</h2>
+<p style="text-align: justify;">
+  Esta plataforma utiliza um emulador javascript baseado na arquitetura do processador 6502 utilizado no console Atari2600.
+  <br>
+  A estrutura básica das instruções é a seguinte:
+</p>
+<pre>label: instrução operandos ;Comentário</pre>
+<p style="text-align: justify;">
+    De maneira simplificada o emulador Easy6502 possui algumas particularidades, como por exemplo:
+</p>
+<ul>
+  <li>O endereço de memória $fe contém um novo byte aleatório a cada instrução.</li>
+  <li>O endereço de memória $ff contém o valor ASCII da última tecla pressionada.</li>
+  <li>Os endereços de memória de $200 até $5ff mapeiam os pixels da tela.</li>
+  <li>Diferentes valores salvos nestes endereços desenham diferentes cores na tela.</li>
+</ul>
+<p style="text-align: justify;">
+  As cores suportadas são:
+</p>
+<!-- <pre></pre> -->
+<!-- <p style="text-align: justify;"></p> -->
+<pre>
+  $0: Preto
+  $1: Branco
+  $2: Vermelho
+  $3: Azul céu
+  $4: Roxo
+  $5: Verde
+  $6: Azul
+  $7: Amarelo
+  $8: Laranja
+  $9: Marrom
+  $a: Vermelho claro
+  $b: Cinza escuro
+  $c: Cinza
+  $d: Verde claro
+  $e: Azul claro
+  $f: Cinza claro
+</pre>
+<h2>Sintaxe</h2>
+<p style="text-align: justify;">
+  Os principais modos de endereçamento são:
+</p>
+<pre>
+  "#" para valor absoluto
+  "$" para endereço em hexadecimal
+  "$, X" para endereço + X, em hexadecimal
+  "#$" para valor absoluto em hexadecimal
+  "#%" para valor absoluto em binário
+</pre>
+
+<h2>Snake6502</h2>
+<p style="text-align: justify;">
+ Neste tópico será explicado o código de exemplo do jogo snake.
+</p>
+<pre>
+  ; Direções (cada uma utilizando um bit diferente)
+  define movingUp      1
+  define movingRight   2
+  define movingDown    4
+  define movingLeft    8
+
+  ; Valor ASCII das teclas para controlar a snake
+  define ASCII_w      $77
+  define ASCII_a      $61
+  define ASCII_s      $73
+  define ASCII_d      $64
+
+  ; Variáveis do sistema
+  define sysRandom    $fe ;Byte aleatório
+  define sysLastKey   $ff ;Última tecla pressionada
+</pre>

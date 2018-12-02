@@ -15,18 +15,18 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let jogo of jogos">
+        <tr *ngFor="let jogo of jogos | async">
           <td> {{ jogo.nome }} </td>
           <td> {{ jogo.descricao }} </td>
           <td> {{ jogo.genero }} </td>
           <td> {{ jogo.codigo }} </td>
           <td>
-            <a class="btn btn-primary" title="Editar" routerLink="/jogos/editar/{{jogo.key}}">
+            <a class="btn btn-primary" title="Editar" (click)="edit(jogo)">
               <i class="fas fa-edit"></i>
             </a>
           </td>
           <td>
-            <a class="btn btn-danger" title="Excluir" href="#">
+            <a class="btn btn-danger" title="Excluir" (click)="delete(jogo)">
               <i class="fas fa-trash-alt"></i>
             </a>
           </td>

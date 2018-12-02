@@ -1,8 +1,9 @@
+import { JogoDataService } from './../../jogos/shared/jogo-data.service';
 import { UserService } from './../../autenticacao/shared/user.service';
 import { Component, OnInit } from '@angular/core';
 import { Jogo } from 'src/app/jogos/shared/jogo';
 import { Router } from '@angular/router';
-import { AutenticacaoService } from 'src/app/autenticacao/shared/autenticacao.service';
+// import { AutenticacaoService } from 'src/app/autenticacao/shared/autenticacao.service';
 
 @Component({
   selector: 'app-easy6502-form',
@@ -14,7 +15,8 @@ export class Easy6502FormComponent implements OnInit {
   usuarioAutenticado: boolean;
   constructor(
     private router: Router,
-    private autenticacaoService: AutenticacaoService,
+    // private autenticacaoService: AutenticacaoService,
+    private jogoDataService: JogoDataService,
     private userService: UserService,
   ) {
     // this.autenticacaoService.emitMudanca$.subscribe(autenticado => {
@@ -35,6 +37,7 @@ export class Easy6502FormComponent implements OnInit {
   }
 
   login() {
+    this.jogoDataService.changeJogo(this.jogo);
     this.router.navigate(['/login']);
   }
 

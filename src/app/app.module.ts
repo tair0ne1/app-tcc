@@ -21,6 +21,7 @@ import { CadastroFormComponent } from './autenticacao/cadastro-form/cadastro-for
 import { NavbarComponent } from './html/navbar/navbar.component';
 import { FooterComponent } from './html/footer/footer.component';
 import { PageNotFoundComponent } from './html/page-not-found/page-not-found.component';
+import { DocumentacaoComponent } from './easy6502/documentacao/documentacao.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +34,7 @@ import { PageNotFoundComponent } from './html/page-not-found/page-not-found.comp
     NavbarComponent,
     FooterComponent,
     PageNotFoundComponent,
+    DocumentacaoComponent,
   ],
   imports: [
     AngularFireAuthModule,

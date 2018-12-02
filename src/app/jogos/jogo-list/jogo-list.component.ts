@@ -1,5 +1,11 @@
-import { Jogo } from './../shared/jogo';
+import { UserService } from './../../autenticacao/shared/user.service';
 import { Component, OnInit } from '@angular/core';
+
+import { Jogo } from './../shared/jogo';
+import { JogoService } from './../shared/jogo.service';
+import { JogoDataService } from '../shared/jogo-data.service';
+import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-jogo-list',
@@ -8,22 +14,32 @@ import { Component, OnInit } from '@angular/core';
 })
 export class JogoListComponent implements OnInit {
   title = 'Meus Jogos';
-  jogos: Jogo[];
+  jogos: Observable<any>;
+  dono: string;
 
-  constructor() { }
+  constructor(
+    private jogoService: JogoService,
+    private jogoDataService: JogoDataService,
+    private userService: UserService,
+    private router: Router,
+  ) { }
 
   ngOnInit() {
-    this.jogos = [
-      { nome: 'Jumanji',
-        descricao: 'Um jogo sobre árvores, floresta e um macaco muito legal.',
-        genero: 'Aventura',
-        codigo: 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk'} as Jogo,
-      { nome: 'Carros',
-        descricao: 'Um jogo sobre carros, pistas e muita ação.',
-        genero: 'Ação',
-        codigo: 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk'} as Jogo,
-    ];
+    this.userService.getCurrentUser()
+      .then((user) => {
+        this.dono = user.uid;
+        this.jogos = this.jogoService.getAllByDono(this.dono);
+      }, err => console.log(err));
+  }
 
+  delete(jogo: Jogo) {
+    jogo.dono = this.dono;
+    this.jogoService.delete(jogo);
+  }
+
+  edit(jogo: Jogo) {
+    this.jogoDataService.changeJogo(jogo);
+    this.router.navigate(['/jogos/editar']);
   }
 
 }

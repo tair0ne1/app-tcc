@@ -4,5 +4,5 @@ export class Jogo {
   descricao?: string;
   genero?: string;
   codigo: string;
-  dono: string;
+  dono?: string;
 }
