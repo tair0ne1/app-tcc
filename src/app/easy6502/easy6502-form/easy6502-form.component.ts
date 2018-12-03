@@ -33,7 +33,8 @@ export class Easy6502FormComponent implements OnInit {
   }
 
   salvarCodigo() {
-    console.log(this.jogo.codigo);
+    this.jogoDataService.changeJogo(this.jogo);
+    this.router.navigate(['/inicio']);
   }
 
   login() {

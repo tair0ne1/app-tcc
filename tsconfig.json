@@ -16,6 +16,10 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "@easy6502/*": ["src/assets/easy6502/6502js-master/*"],
+    }
+
   }
 }

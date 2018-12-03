@@ -2,6 +2,8 @@ import { UserService } from './../../autenticacao/shared/user.service';
 import { AutenticacaoService } from './../../autenticacao/shared/autenticacao.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { Jogo } from 'src/app/jogos/shared/jogo';
+import { JogoDataService } from 'src/app/jogos/shared/jogo-data.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,6 +18,7 @@ export class NavbarComponent implements OnInit {
     private autenticacaoService: AutenticacaoService,
     private userService: UserService,
     private router: Router,
+    private jogoDataService: JogoDataService,
   ) {
     this.autenticacaoService.emitMudanca$.subscribe( autenticado => {
       this.autenticado = autenticado;
@@ -39,6 +42,11 @@ export class NavbarComponent implements OnInit {
       }, erro => {
         console.log(erro);
       });
+  }
+
+  novoJogo() {
+    this.jogoDataService.changeJogo(new Jogo());
+    this.router.navigate(['/inicio']);
   }
 
 }

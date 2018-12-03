@@ -10,12 +10,12 @@ import { LoginFormComponent } from './autenticacao/login-form/login-form.compone
 import { DocumentacaoComponent } from './easy6502/documentacao/documentacao.component';
 
 export const appRoutes: Routes = [
-  { path: 'inicio', component: Easy6502FormComponent},
+  { path: 'inicio', component: JogoFormComponent},
   { path: 'documentacao', component: DocumentacaoComponent},
   { path: 'login', component: LoginFormComponent, canActivate: [AutenticacaoGuard] },
   { path: 'login/:mensagemDeErro', component: LoginFormComponent, canActivate: [AutenticacaoGuard] },
   { path: 'cadastrar', component: CadastroFormComponent, canActivate: [AutenticacaoGuard] },
-  { path: 'jogos/novo', component: JogoFormComponent, canActivate: [AutenticadoGuard] },
+  // { path: 'jogos/novo', component: JogoFormComponent, canActivate: [AutenticadoGuard] },
   { path: 'jogos/editar', component: JogoFormComponent, canActivate: [AutenticadoGuard] },
   { path: 'jogos', component: JogoListComponent, canActivate: [AutenticadoGuard] },
   { path: '', redirectTo: 'inicio', pathMatch: 'full'},

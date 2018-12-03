@@ -8,7 +8,7 @@
     <a routerLink="/documentacao" class="navbar-brand text-light">Documentação</a>
   </div>
   <div *ngIf="autenticado === true" class="col-md-4">
-    <a routerLink="/jogos/novo" class="navbar-brand text-light">Novo Jogo</a>
+    <a (click)="novoJogo()" class="navbar-brand text-light">Novo Jogo</a>
     <a routerLink="/jogos" class="navbar-brand text-light">Meus Jogos</a>
     <a (click)="sair()" class="btn btn-secondary text-light">Sair</a>
   </div>

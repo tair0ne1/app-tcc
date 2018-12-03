@@ -9,13 +9,14 @@ import { UserService } from 'src/app/autenticacao/shared/user.service';
 @Component({
   selector: 'app-jogo-form',
   templateUrl: './jogo-form.component.html',
-  styleUrls: ['./jogo-form.component.css']
+  styleUrls: ['../../../assets/easy6502/6502js-master/emulator-style.css']
 })
 export class JogoFormComponent implements OnInit {
   jogo: Jogo;
   title = 'Novo Jogo';
   mensagemDeErro = '';
   mensagemDeSucesso = '';
+  usuarioAutenticado: boolean;
 
   constructor(private jogoService: JogoService,
               private jogoDataService: JogoDataService,
@@ -24,6 +25,8 @@ export class JogoFormComponent implements OnInit {
               ) { }
 
   ngOnInit() {
+    this.loadScript();
+    this.userService.getCurrentUser().then(res => { this.usuarioAutenticado = true; }, erro => this.usuarioAutenticado = false);
     this.jogo = new Jogo();
     try {
       this.jogoDataService.currentJogo.subscribe(data => {
@@ -36,6 +39,43 @@ export class JogoFormComponent implements OnInit {
       console.log('ERRO' + e);
     }
   }
+
+  public loadScript() {
+    const scripts = document.getElementsByTagName('script');
+    for (let i = 0; i < scripts.length; ++i) {
+        if (scripts[i].getAttribute('src') != null &&
+            scripts[i].getAttribute('src').includes('assembler')
+            ) {
+              document.getElementsByTagName('head')[0].removeChild(scripts[i]);
+        }
+    }
+    for (let i = 0; i < scripts.length; ++i) {
+      if (scripts[i].getAttribute('src') != null &&
+          scripts[i].getAttribute('src').includes('es5-shim')
+          ) {
+            document.getElementsByTagName('head')[0].removeChild(scripts[i]);
+      }
+    }
+
+    const assemblerPath = ['../../../assets/easy6502/6502js-master/assembler.js'];
+    for (let i = 0; i < assemblerPath .length; i++) {
+      const assembler = document.createElement('script');
+      assembler.src = assemblerPath [i];
+      assembler.type = 'text/javascript';
+      assembler.async = false;
+      assembler.charset = 'utf-8';
+      document.getElementsByTagName('head')[0].appendChild(assembler);
+    }
+    const es5shimPath = ['../../../assets/easy6502/6502js-master/es5-shim.js'];
+    for (let i = 0; i < es5shimPath .length; i++) {
+      const es5shim = document.createElement('script');
+      es5shim.src = es5shimPath [i];
+      es5shim.type = 'text/javascript';
+      es5shim.async = false;
+      es5shim.charset = 'utf-8';
+      document.getElementsByTagName('head')[0].appendChild(es5shim);
+    }
+}
 
   onSubmit() {
     if (
@@ -62,8 +102,14 @@ export class JogoFormComponent implements OnInit {
   }
 
   cancel() {
-    this.jogo = new Jogo();
+    if (!this.jogo.key) {
+      this.jogoDataService.changeJogo(new Jogo());
+    }
     this.router.navigate(['/jogos']);
   }
 
+  login() {
+    this.jogoDataService.changeJogo(this.jogo);
+    this.router.navigate(['/login']);
+  }
 }
