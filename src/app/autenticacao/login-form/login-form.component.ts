@@ -32,7 +32,7 @@ export class LoginFormComponent implements OnInit {
     this.autenticacaoService.login(this.usuario)
       .then(res => {
         console.log('emitiu o evento');
-        this.router.navigate(['/inicio']);
+        this.router.navigate(['/jogos/novo']);
       }, erro => {
         this.trataErro(erro);
       });

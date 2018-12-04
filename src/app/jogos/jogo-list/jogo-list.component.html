@@ -17,9 +17,9 @@
       <tbody>
         <tr *ngFor="let jogo of jogos | async">
           <td> {{ jogo.nome }} </td>
-          <td> {{ jogo.descricao }} </td>
+          <td> {{ jogo.descricao | slice:0:20 }} ... </td>
           <td> {{ jogo.genero }} </td>
-          <td> {{ jogo.codigo }} </td>
+          <td> {{ jogo.codigo | slice:0:30 }} ... </td>
           <td>
             <a class="btn btn-primary" title="Editar" (click)="edit(jogo)">
               <i class="fas fa-edit"></i>

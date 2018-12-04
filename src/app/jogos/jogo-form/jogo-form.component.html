@@ -1,9 +1,3 @@
-<!-- <script src="../../../assets/easy6502/6502js-master/assembler.js"></script>
-<script src="../../../assets/easy6502/6502js-master/es5-shim.js"></script> -->
-<!-- <link href="../../../assets/easy6502/6502js-master/emulator-style.css" rel="stylesheet" type="text/css"/> -->
-<!-- <script src="./assets/easy6502/6502js-master/assembler.js"></script>
-<script src="./assets/easy6502/6502js-master/es5-shim.js"></script>
-<link href="./assets/easy6502/6502js-master/emulator-style.css" rel="stylesheet" type="text/css"/> -->
 <div class="card">
   <div class="card-header bg-primary text-light">
     {{ title }}
@@ -67,7 +61,7 @@
             <input type="button" value="Hexdump" class="hexdumpButton" />
             <input type="button" value="Disassemble" class="disassembleButton" />
             <input type="button" value="Notes" class="notesButton" />
-            <button *ngIf="usuarioAutenticado && !jogoForm.form.valid" [swal]="required" type="submit">Save</button>
+            <!-- <button *ngIf="usuarioAutenticado && !jogoForm.form.valid" [swal]="required" type="submit">Save</button>
             <button *ngIf="usuarioAutenticado && jogoForm.form.valid" type="submit">Save</button>
             <swal
               #required
@@ -86,7 +80,7 @@
               [showConfirmButton]="true"
               [options]="{ cancelButtonText: 'Cancelar', confirmButtonText: 'Fazer Login' }"
               (confirm)="login()"
-            ></swal>
+            ></swal> -->
           </div>
 
           <textarea class="code" name="codigo" id="codigo" [(ngModel)]="jogo.codigo" #codigo="ngModel" required>
@@ -155,8 +149,8 @@
         <label *ngIf="mensagemDeSucesso !== ''" class="alert alert-success mt-2">{{ mensagemDeSucesso }}</label>
       </div>
 
-      <!-- <a (click)="cancel()" class="btn btn-secondary">Cancelar</a> -->
-      <!-- <button type="submit" class="btn btn-primary ml-2" [disabled]="!jogoForm.form.valid">Salvar</button> -->
+      <a (click)="cancel()" class="btn btn-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary ml-2" [disabled]="!jogoForm.form.valid">Salvar</button>
 
     </form>
   </div>

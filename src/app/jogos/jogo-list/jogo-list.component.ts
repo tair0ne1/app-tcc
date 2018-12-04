@@ -39,12 +39,12 @@ export class JogoListComponent implements OnInit {
 
   edit(jogo: Jogo) {
     this.jogoDataService.changeJogo(jogo);
-    this.router.navigate(['/inicio']);
+    this.router.navigate(['/jogos/novo']);
   }
 
   novoJogo() {
     this.jogoDataService.changeJogo(new Jogo());
-    this.router.navigate(['/inicio']);
+    this.router.navigate(['/jogos/novo']);
   }
 
 }

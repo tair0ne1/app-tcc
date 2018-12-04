@@ -22,6 +22,8 @@ import { NavbarComponent } from './html/navbar/navbar.component';
 import { FooterComponent } from './html/footer/footer.component';
 import { PageNotFoundComponent } from './html/page-not-found/page-not-found.component';
 import { DocumentacaoComponent } from './easy6502/documentacao/documentacao.component';
+import { Snake6502Component } from './easy6502/snake6502/snake6502.component';
+import { Snake6502EmulatorComponent } from './easy6502/snake6502-emulator/snake6502-emulator.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +37,8 @@ import { DocumentacaoComponent } from './easy6502/documentacao/documentacao.comp
     FooterComponent,
     PageNotFoundComponent,
     DocumentacaoComponent,
+    Snake6502Component,
+    Snake6502EmulatorComponent,
   ],
   imports: [
     AngularFireAuthModule,

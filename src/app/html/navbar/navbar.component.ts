@@ -46,7 +46,7 @@ export class NavbarComponent implements OnInit {
 
   novoJogo() {
     this.jogoDataService.changeJogo(new Jogo());
-    this.router.navigate(['/inicio']);
+    this.router.navigate(['/jogos/novo']);
   }
 
 }

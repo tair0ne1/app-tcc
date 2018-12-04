@@ -2,10 +2,12 @@
   <div *ngIf="autenticado === true" class="col-md-8">
     <a routerLink="/inicio" class="navbar-brand text-light">Inicio</a>
     <a routerLink="/documentacao" class="navbar-brand text-light">Documentação</a>
+    <a routerLink="/snake6502" class="navbar-brand text-light">Snake6502</a>
   </div>
   <div *ngIf="autenticado === false" class="col-md-8">
     <a routerLink="/inicio" class="navbar-brand text-light">Inicio</a>
     <a routerLink="/documentacao" class="navbar-brand text-light">Documentação</a>
+    <a routerLink="/snake6502" class="navbar-brand text-light">Snake6502</a>
   </div>
   <div *ngIf="autenticado === true" class="col-md-4">
     <a (click)="novoJogo()" class="navbar-brand text-light">Novo Jogo</a>

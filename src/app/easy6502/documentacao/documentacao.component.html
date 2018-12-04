@@ -1,10 +1,47 @@
 <h2>Introdução</h2>
 <p style="text-align: justify;">
-  Esta plataforma utiliza um emulador javascript baseado na arquitetura do processador 6502 utilizado no console Atari2600.
+  Esta plataforma utiliza um emulador escrito totalmente em javascript baseado na arquitetura do processador 6502 utilizado no console Atari2600.
   <br>
-  A estrutura básica das instruções é a seguinte:
+  Tendo em vista que é baseado na arquitetura do processador 6502, as instruções básicas, sintaxe do código e estruturação do mesmo foi mantida igual na medida do possível.
+  <br>
+  Para mais informações (externas e em inglês) sobre a linguagem assembly, além de informações sobre o processador 6502 e um detalhamento maior sobre as instruções consulte:
 </p>
-<pre>label: instrução operandos ;Comentário</pre>
+<ul>
+  <li>
+    <a href="http://en.wikipedia.org/wiki/Assembly_language" target="_blank">Assembly - Wikipedia</a>
+  </li>
+  <li>
+    <a href="http://www.obelisk.me.uk/6502/" target="_blank">6502 by Obelisk</a>
+  </li>
+  <li>
+    <a href="http://www.6502.org/tutorials/" target="_blank">6502 by 6502.org</a>
+  </li>
+  <li>
+    <a href="http://skilldrick.github.io/easy6502/#registers">Easy6502 by Skilldrick</a>
+  </li>
+</ul>
+<h2>Interface do emulador</h2>
+<app-easy6502-form></app-easy6502-form>
+<ul>
+  <li>O botão "Assemble" é o responsável por montar o código escrito.</li>
+  <li>O botão "Run" só ativa após o código ser montado com sucesso e é responsável por executar o código.</li>
+  <li>O botão "Reset" é ativado após o jogo ser rodado a primeira vez e é responsável por reiniciar a execução do código.</li>
+  <li>O botão "Hexdump" exibe ao usuário o resultado do código montado em linguagem de máquina.</li>
+  <li>O Botão "Disassembly" mostra uma comparação do código em linguagem de máquina e o código em assembly.</li>
+  <li>O Botão "Notes" carrega no console as anotações contidas no emulador.</li>
+  <li>O Botão "Save" permite ao usuário salvar o código escrito no emulador.</li>
+  <li>Logo abaixo dos botões está a área que é utilizada para escrever o código.</li>
+  <li>A direita da caixa de código está a tela onde serão desenhados os pixels.</li>
+  <li>Abaixo da tela está a área onde é possível monitorar os registradores e debugar o código.</li>
+  <li>Na checkbox "Debugger" ativa o modo de depuração do emulador onde é possível executar o código de passo a passo no botão "Step" ou pular para um endereço de execução específico no botão "Jump to...".</li>
+  <li>Na checkbox "Monitor" abaixo da caixa de código é possível habilitar o monitor com o mapa de memória do emulador.</li>
+  <li>No input "Start" é possível especificar o endereço inicial que será exibido no monitor.</li>
+  <li>No input "Length" é possível especificar o endereço final que será exibido no monitor.</li>
+  <li>No console serão exibidas respostas do emulador para o usuário.</li>
+</ul>
+<h2>Sintaxe</h2>
+<p style="text-align: justify;">As instruções do 6502 são de apenas 1 operando, salva exceção em endereçamentos indiretos. A estrutura básica das instruções é a seguinte:</p>
+<pre>label: instrução operando ;Comentário</pre>
 <p style="text-align: justify;">
     De maneira simplificada o emulador Easy6502 possui algumas particularidades, como por exemplo:
 </p>
@@ -17,8 +54,6 @@
 <p style="text-align: justify;">
   As cores suportadas são:
 </p>
-<!-- <pre></pre> -->
-<!-- <p style="text-align: justify;"></p> -->
 <pre>
   $0: Preto
   $1: Branco
@@ -37,7 +72,6 @@
   $e: Azul claro
   $f: Cinza claro
 </pre>
-<h2>Sintaxe</h2>
 <p style="text-align: justify;">
   Os principais modos de endereçamento são:
 </p>
@@ -48,25 +82,179 @@
   "#$" para valor absoluto em hexadecimal
   "#%" para valor absoluto em binário
 </pre>
-
-<h2>Snake6502</h2>
 <p style="text-align: justify;">
- Neste tópico será explicado o código de exemplo do jogo snake.
+  O conjunto de registradores inclusos são os seguintes:
 </p>
 <pre>
-  ; Direções (cada uma utilizando um bit diferente)
-  define movingUp      1
-  define movingRight   2
-  define movingDown    4
-  define movingLeft    8
-
-  ; Valor ASCII das teclas para controlar a snake
-  define ASCII_w      $77
-  define ASCII_a      $61
-  define ASCII_s      $73
-  define ASCII_d      $64
-
-  ; Variáveis do sistema
-  define sysRandom    $fe ;Byte aleatório
-  define sysLastKey   $ff ;Última tecla pressionada
+  Registradores de propósito geral: A, X, Y
+  Registrador Stack Pointer: SP
+  Registrador Program Counter: PC
+</pre>
+<h2>LD - Load</h2>
+<p style="text-align: justify;">
+  Carrega dados para o registrador específico.
+</p>
+<pre>
+  LDA #$80
+  LDX #$81
+  LDY #$82
+</pre>
+<h2>ST - Store</h2>
+<p style="text-align: justify;">
+  Salva a informação do registrador específico em algum endereço de memória especificado no operando.
+</p>
+<pre>
+  STA $0200
+  STX $0201
+  STY $0202
+</pre>
+<p style="text-align: justify;">
+  Ainda é possível fazer o salvamento com offset, onde se carrega o endereço inicial da contagem mais
+o valor que deve ser desviado a mais ou a menos.
+</p>
+<pre>
+  STA $0200, Y
+</pre>
+<h2>T - Transferencia</h2>
+<p style="text-align: justify;">
+  Transfere os dados de um registrador para o outro. Do registrador à esquerda para o registrador à direita.
+</p>
+<pre>
+  TAX ;transfere os dados do registrador A para X
+  TAY
+  TXA
+  TYA
+  TSX
+  TXS
+</pre>
+<h2>ADC - Adição com Carry</h2>
+<p style="text-align: justify;">
+  Adiciona o valor no operando ao acumulador. Caso estoure o limite mapeável de memória, ativa a flag de carry.
+</p>
+<pre>
+  ADC #$44
+</pre>
+<h2>SBC - Subtração com Carry</h2>
+<p style="text-align: justify;">
+  Subtrai o valor no operando ao acumulador.Caso estoure o limite mapeável de memória, ativa a flag de carry.
+</p>
+<pre>
+  SBC #$44
+</pre>
+<h2>IN - Incremento</h2>
+<p style="text-align: justify;">
+  Incrementa o valor no registrador.
+</p>
+<pre>
+  INC ;Acumulador
+  INX ;Reg. X
+  INY ;Reg. Y
+</pre>
+<h2>DE - Decremento</h2>
+<p style="text-align: justify;">
+  Decrementa o valor no registrador.
+</p>
+<pre>
+  DEC ;Acumulador
+  DEX ;Reg. X
+  DEY ;Reg. Y
+</pre>
+<h2>Instruções Flag</h2>
+<p style="text-align: justify;">
+  Instruções que manipulam o PS (Processor Status/Estado do Processador).
+</p>
+<pre>
+  CLC ;Limpa a flag de carry
+  SEC ;Seta flag carry
+  CLI ;Limpa a flag interrupt
+  SEI ;Seta flag interrupt
+  CLV ;Limpa a flag de overflow
+</pre>
+<h2>C - Comparação</h2>
+<p style="text-align: justify;">
+  Compara o valor do operando com o valor armazenado no acumulador do mnemônico.
+</p>
+<pre>
+  CMP #$44         ;Acumulador
+  CMP $4400, Y     ;Acumulador
+  CPX #$44         ;Registrador X
+  CPX $4400, Y     ;Registrador X
+  CPY #$44         ;Registrador Y
+  CPY $4400, Y     ;Registrador Y
+</pre>
+<h2>Operações de desvio</h2>
+<p style="text-align: justify;">
+  Operações que desviam para o endereço de memória ou Label caso as condições
+sejam cumpridas na comparação.
+</p>
+<pre>
+  BPL label ;Desvia caso maior
+  BMI label ;Desvia caso não maior
+  BVS label ;Desvia se overflow
+  BVC label ;Desvia se não overflow
+  BCS label ;Desvia se carry
+  BCC label ;Desvia se não carry
+  BEQ label ;Desvia se igual
+  BNE label ;Desvia se não igual
+</pre>
+<h2>JMP - Desvio direto</h2>
+<p style="text-align: justify;">
+  Desvia para o endereço de memória ou label especificado.
+</p>
+<pre>
+  JMP label
+</pre>
+<h2>BRK - Quebra</h2>
+<p style="text-align: justify;">
+  Operação que causa interrupção na execução do programa.
+</p>
+<pre>
+  BRK
+</pre>
+<h2>NOP - Nenhuma Operação</h2>
+<p style="text-align: justify;">
+  Código que não executa nenhuma operação. Normalmente se utiliza para guardar
+espaço no código para modificações/incrementos futuros.
+</p>
+<pre>
+  NOP
+</pre>
+<h2>define - Declaração</h2>
+<p style="text-align: justify;">
+  Declara labels com valores atribuídos.
+</p>
+<pre>
+  define label $00
+</pre>
+<h2>Sub-rotinas</h2>
+<p style="text-align: justify;">
+  Chamadas e retornos de sub-rotinas do código.
+</p>
+<pre>
+  JSR label ;Chama su-brotina
+  RTS label ;Retorna da sub-rotina
+</pre>
+<h2>AND</h2>
+<p style="text-align: justify;">
+  Faz uma operação AND do valor especificado no operador com o valor contido no acumulador.
+</p>
+<pre>
+  AND #$44
+  AND $4400,X
+</pre>
+<h2>BIT</h2>
+<p style="text-align: justify;">
+  Faz uma comparação AND e seta a flag Zero.
+</p>
+<pre>
+  BIT #$02
+</pre>
+<h2>LSR - Logical Shift Right</h2>
+<p style="text-align: justify;">
+  Movimenta todos bits uma posição para direita, o bit que "cai fora" é colocado na flag carry.
+</p>
+<pre>
+  LSR A
+  LSR $44
+  LSR $4400,x
 </pre>

@@ -40,7 +40,7 @@ export class JogoFormComponent implements OnInit {
     }
   }
 
-  public loadScript() {
+  loadScript() {
     const scripts = document.getElementsByTagName('script');
     for (let i = 0; i < scripts.length; ++i) {
         if (scripts[i].getAttribute('src') != null &&
@@ -75,7 +75,7 @@ export class JogoFormComponent implements OnInit {
       es5shim.charset = 'utf-8';
       document.getElementsByTagName('head')[0].appendChild(es5shim);
     }
-}
+  }
 
   onSubmit() {
     if (

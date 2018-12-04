@@ -1,0 +1,503 @@
+<h2>Snake6502</h2>
+<p style="text-align: justify;">
+  Esta área da plataforma está reservada para a demonstração de um jogo e também explicação do código desenvolvido para o mesmo. Segue o código:
+</p>
+<app-snake6502-emulator></app-snake6502-emulator>
+<p style="text-align: justify;">
+  No primeiro trecho do código podemos ver que foram definidas algumas variáveis para reutilização posterior.
+</p>
+<pre>
+  ;  ___           _        __ ___  __ ___
+  ; / __|_ _  __ _| |_____ / /| __|/  \_  )
+  ; \__ \ ' \/ _` | / / -_) _ \__ \ () / /
+  ; |___/_||_\__,_|_\_\___\___/___/\__/___|
+
+  ; Botões direcionais: W A S D
+
+  define appleL         $00 ; localização da maça na tela, byte menos significativo
+  define appleH         $01 ; localização da maçã na tela, byte mais significativo
+  define snakeHeadL     $10 ; localização da cabeça da cobra, byte menos significativo
+  define snakeHeadH     $11 ; localização da cabeça da cobra, byte mais significativo
+  define snakeBodyStart $12 ; começo do corpo da cobra, pares de byte
+  define snakeDirection $02 ; direção da cobra (valores possíveis abaixo)
+  define snakeLength    $03 ; comprimento da cobra, em bytes
+</pre>
+<p style="text-align: justify;">
+  Para fazer a movimentação da cobra precisamos primeiro mapear as direções que ela pode tomar.
+</p>
+<pre>
+  ; Direções (cada uma utilizando um bit diferente)
+  define movingUp      1 ;0001
+  define movingRight   2 ;0010
+  define movingDown    4 ;0100
+  define movingLeft    8 ;1000
+</pre>
+<p style="text-align: justify;">
+  Então precisamos mapear as teclas que irão ativar a mudança de direção.
+</p>
+<pre>
+  ; Valor ASCII das teclas para controlar a snake
+  define ASCII_w      $77
+  define ASCII_a      $61
+  define ASCII_s      $73
+  define ASCII_d      $64
+</pre>
+<p style="text-align: justify;">
+  Logo após mapeamos as variáveis de utilidade do código.
+</p>
+<pre>
+  ; Variáveis do sistema
+  define sysRandom    $fe ;Byte aleatório
+  define sysLastKey   $ff ;Última tecla pressionada
+</pre>
+<p style="text-align: justify;">
+  A tela é dividia em 8 faixas de 8x32 "pixels".
+  Cada faixa é armazenada em uma página, tendo cada uma seu próprio byte mais significativo e menos significativo.
+  Cada página tem 256 bytes, começando em $00 e terminando em $ff.
+</p>
+<pre>
+  ;   ------------------------------------------------------------
+  ;1  | $0200 - $02ff                                            |
+  ;2  |                                                          |
+  ;3  |                                                          |
+  ;4  |                                                          |
+  ;5  |                                                          |
+  ;6  |                                                          |
+  ;7  |                                                          |
+  ;8  |                                                          |
+  ;   ------------------------------------------------------------
+  ;9  | $03 - $03ff                                              |
+  ;10 |                                                          |
+  ;11 |                                                          |
+  ;12 |                                                          |
+  ;13 |                                                          |
+  ;14 |                                                          |
+  ;15 |                                                          |
+  ;16 |                                                          |
+  ;   ------------------------------------------------------------
+  ;17 | $04 - $03ff                                              |
+  ;18 |                                                          |
+  ;19 |                                                          |
+  ;20 |                                                          |
+  ;21 |                                                          |
+  ;22 |                                                          |
+  ;23 |                                                          |
+  ;24 |                                                          |
+  ;   ------------------------------------------------------------
+  ;25 | $05 - $03ff                                              |
+  ;26 |                                                          |
+  ;27 |                                                          |
+  ;28 |                                                          |
+  ;29 |                                                          |
+  ;30 |                                                          |
+  ;31 |                                                          |
+  ;32 |                                                          |
+  ;   ------------------------------------------------------------
+</pre>
+<p style="text-align: justify;">
+  Logo após precisamos iniciar as sub-rotinas principais do jogo, "init" e "loop".
+</p>
+<pre>
+  jsr init ;pula para a sub-rotina init
+  jsr loop ;pula para a sub-rotina loop
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina init é chamada a sub-rotina que inicializa a cobra e também gera a maçã em uma posição aleatória e retorna da sub-rotina init.
+</p>
+<pre>
+  init:
+    jsr initSnake             ;pula para sub-rotina initSnake
+    jsr generateApplePosition ;pula para sub-rotina generateApplePosition
+    rts                       ;return
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina "initSnake" é inicializada a cobra no meio da tela do jogo em posição horizontal e tendo 4 bytes de comprimento,
+significando um comprimento de 3 pedaços: a cabeça e dois blocos de corpo. A cabeça está olhando para a direita e a cobra andando para a mesma direção.
+</p>
+<pre>
+  initSnake:
+  ;direção inicial da cobra (2 => right)
+    lda #movingRight   ;direção inicial, coloca o número decimal 2 no registrador A
+    sta snakeDirection ;salva o valor do registrador A no endereço $02
+
+    ;comprimento inicial da cobra de 4 bytes
+    lda #4           ;comprimento inicial, coloca o número decimal 4 no registrador A
+    sta snakeLength  ;salva o valor do registrador A no endereço $03
+
+    ;Localização inicial do byte menos significativo para determinar
+    ;onde em 8x32 faixas que a cabeça irá começar.
+    ;O valor hexadecimal $11 é logo a direita do centro da primeira faixa.
+    lda #$11        ;coloca o número hexadecimal $11(decimal 17) no registrador A
+    sta snakeHeadL  ;salva o valor do registrador A no endereço hexadecimal 10
+
+    ;Posição inicial do corpo da cobra, os dois bytes menos significativos
+    ;são setados com o valor hexadecimal $10 e $0f. Respectivamente um e dois
+    ;quadros para a esquerda da cabeça.
+    lda #$10            ;coloca o valor hexadecimal $10 (decimal 16) no registrador A
+    sta snakeBodyStart  ;salva o valor no registrador A no endereço hexa $12
+    lda #$0f            ;coloca o valor hexa $0f (dec 15) no registrador A
+    sta $14             ;salva o valor do registrador A no endereço hexa $14
+
+    ;os bytes mais significativos da cabeça e do corpo da cobra
+    ;são setados para o valor hexa $04, que é a terceira faixa 8x32.
+    lda #$04        ;coloca o valor hexa $04 no registrador A
+    sta snakeHeadH  ;salva o valor do registrador A no endereço hexa $11
+    sta $13         ;salva o valor do registrador A no endereço hexa $13
+    sta $15         ;salva o valor do registrador A no endereço hexa $15
+    rts             ;return
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina "generateApplePosition" é desenhada na tela a nova posição aleatória da maçã.
+</p>
+<pre>
+  generateApplePosition:
+  ;O byte menos significativo da posição da maçã vai determinar onde
+  ;em uma faixa 8x32 que a maçã será colocada. Este número pode ser qualquer byte
+  ;pois o tamanho de uma faixa 8x32 é exatamente um em 256 bytes.
+    lda sysRandom ;carrega um número aleatório entre 0 e 255 do endereço $fe no registrador A
+    sta appleL    ;salva o valor do registrador A no endereço hexa $00
+
+    ;carrega um novo número aleatório de 2 a 5 em $01, o byte mais significativo
+    ;da posição da maçã. Isto vai determinar onde em uma faixa 8x32 que a maçã será colocada
+    lda sysRandom  ;carrega um número aleatório do endereço $fe no registrador A
+
+    ;AND: AND lógico com o acumulador. Aplica AND lógico com o hexa $03 e o valor no registrador A
+    ;O hexa 03 é o binario 00000011, então só os dois últimos bits significativos
+    ;são mantidos,resultando em um valor entre 0 (bin 00000000) e 3 (bin 00000011).
+    ;Adicionando 2 se obtém um número aleatório entre 2 e 5.
+    and #$03    ;mascara os 2 bits menos significativos
+    clc         ;limpa a flag carry
+    adc #2      ;adiciona 2 no registrador A, usando o bit carry para overflow.
+    sta appleH  ;salva o valor Y do registrador A no endereço $01
+
+    rts      ;return
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina "loop" são executadas as chamadas necessárias para manter a lógica do jogo rodando.
+</p>
+<pre>
+  ;o laço de repetição principal
+  loop:
+    jsr readKeys         ;pula para a sub-rotina readKeys
+    jsr checkCollision   ;pula para a sub-rotina checkCollision
+    jsr updateSnake      ;pula para a sub-rotina updateSnake
+    jsr drawApple        ;pula para a sub-rotina drawApple
+    jsr drawSnake        ;pula para a sub-rotina drawSnake
+    jsr spinWheels       ;pula para a sub-rotina spinWheels
+    jmp loop             ;volta ao inicio da sub-rotina loop
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina "readKeys" acontece a leitura da última tecla pressionada no teclado.
+</p>
+<pre>
+  readKeys:
+  ;para pegar a tecla pressionada, o último endereço ($ff)
+  ;contém o valor hexadecimal da mesma.
+
+    lda sysLastKey ;carrega o valor da última tecla pressionada contida no endereço ($ff) no registrador A
+    cmp #ASCII_w   ;compara o valor contido no registrador A com o hexa $77(W)
+    beq upKey      ;Pula para label upKey caso a comparação seja igual
+    cmp #ASCII_d   ;compara o valor contido no registrador A com o hexa $64(D)
+    beq rightKey   ;Pula para label rightKey caso a comparação seja igual
+    cmp #ASCII_s   ;compara o valor contido no registrador A com o hexa $73(S)
+    beq downKey    ;Pula para label downKey caso a comparação seja igual
+    cmp #ASCII_a   ;compara o valor contido no registrador A com o hexa $61(A)
+    beq leftKey    ;Pula para label leftKey caso a comparação seja igual
+    rts            ;return
+</pre>
+<p style="text-align: justify;">
+  Nas sub-rotinas "upKey", "rightKey", "downKey" e "leftKey", são feitas verificações se a próxima direção é válida e se for é atualizada a direção da cobra.
+Caso a direção não seja válida é chamada a sub-rotina "illegalMove" e não é atualizada a direção da cobra.
+</p>
+<pre>
+  upKey:
+    lda #movingDown    ;carrega o valor 4 no registrador A, correspondente ao valor para BAIXO
+    bit snakeDirection ;AND com o valor do endereço $02 (direção atual),
+                       ;setando flag zero se o resultado da operação AND com os dois valores for 0.
+                       ;Comparando 4 (bin 0100) só zera a flag se a direção atual for 4(down).
+                       ;Então para um movimento ilegal, o resultado da operação AND seria um
+                       ;valor não zero para a flag zero não ser setada. Para um movimento legal
+                       ;a operação AND na nova direção deve dar o resultado oposto.
+    bne illegalMove    ;Desvia se não igual: significando que a flag zero não foi ativada.
+
+    lda #movingUp      ;Chegando aqui significa que o movimento é permitido, carrega o valor 1(UP)
+                       ;no registrador A
+    sta snakeDirection ;Salva o valor de A (nova direção) no registrador A
+    rts                ;return
+
+  rightKey:
+    lda #movingLeft    ;carrega o valor 8 no registrador A, que corresponde a direção para ESQUERDA
+    bit snakeDirection ;AND com a direção atual no endereço $02 e verifica se o resultado é zero
+    bne illegalMove    ;Desvia se não igual: significando que a flag zero não foi ativada.
+
+    lda #movingRight   ;Chegando aqui significa que o movimento é permitido, carrega o valor 2(RIGHT)
+                       ;no registrador A
+    sta snakeDirection ;Salva o valor de A (nova direção) no registrador A
+    rts                ;return
+
+  downKey:
+    lda #movingUp
+    bit snakeDirection
+    bne illegalMove
+
+    lda #movingDown
+    sta snakeDirection
+    rts
+
+  leftKey:
+    lda #movingRight
+    bit snakeDirection
+    bne illegalMove
+
+    lda #movingLeft
+    sta snakeDirection
+    rts
+
+  illegalMove:
+    ;para um movimento ilegal é feito o retorno e a tecla pressionada ignorada
+    rts                ;return
+
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina "checkCollision" é verificado se a cobra bateu e vai perder o jogo e se ela colidiu com a maçã e vai crescer.
+</p>
+<pre>
+  checkCollision:
+    jsr checkAppleCollision
+    jsr checkSnakeCollision
+    rts
+
+
+  checkAppleCollision:
+    ;verifica se a cobra colidiu com a maçã comparando o byte menos e mais significativo
+    ;da posição da cabeça da cobra e da maçã.
+    lda appleL                     ;carrega o valor do endereço $00 (byte menos significativo
+                                   ;da posição da maçã) no registrador A
+    cmp snakeHeadL                 ;compara com o valor salvo no endereço $10
+                                   ;(o byte menos significativo da posição da cabeça da cobra)
+    bne doneCheckingAppleCollision ;se diferente, pula para a label doneCheckingAppleCollision
+    lda appleH                     ;carrega o valor do endereço $01 (byte mais significativo
+                                   ;da posição da maçã) no registrador A
+    cmp snakeHeadH                 ;compara com o valor salvo no endereço $11
+                                   ;(o byte mais significativo da posição da cabeça da cobra)
+    bne doneCheckingAppleCollision ;se diferente, pula para a label doneCheckingAppleCollision
+
+    ;Se chegar até aqui, significa que as coordenadas da cabeça da cobra são as mesmas
+    ;da maçã. Coma a maçã!
+    inc snakeLength               ;incrementa o valor salvo na posição de memória $03
+    inc snakeLength               ;duas vezes pois estamos adicionando dois bytes por cubo
+
+    ;criando nova maçã
+    jsr generateApplePosition ;pula para a sub-rotina generateApplePosition
+
+  doneCheckingAppleCollision:
+    ;a cobra não estava na maçã. Não faça nada com a maçã
+    rts ;return
+
+
+  checkSnakeCollision:
+    ldx #2 ;Carrega o valor 2 no registrador X, então nós podemos começar com o primeiro pedaço
+
+  snakeCollisionLoop:
+    lda snakeHeadL,x ;carrega o valor salvo no endereço de memória $10 (byte menos significativo
+                     ;da localização da cabeça da cobra) mais o valor do registrador x
+                     ;(2 na primeira interação) para pegar o byte menos significativo
+                     ;da posição do próximo pedaço da cobra
+    cmp snakeLength  ;compara com o valor no endereço de memória $10 (byte menos significativo
+                     ;da posição da cabeça da cobra)
+    bne continueCollisionLoop ;se não for igual, não houve colisão ainda,
+                              ;pula para continueCollisionLoop e continua o laço
+
+  maybeCollided:
+    ;chegando aqui significa que encontramos um pedaço do corpo da cobra que
+    ;tem o byte menos significativo igual ao da cabeça.
+    lda snakeHeadH,x ;carrega o valor salvo no endereço de memória $11 (byte mais significativo
+                     ;da localização da cabeça da cobra) mais o valor do registrador x
+                     ;(2 na primeira interação) para pegar o byte mais significativo
+                     ;da posição do próximo pedaço da cobra
+    cmp snakeHeadH   ;compara com o valor no endereço de memória $11 (byte mais significativo
+                     ;da posição da cabeça da cobra)
+    beq didCollide   ;se os dois valores são iguais, então a cobra bateu no próprio corpo
+
+  continueCollisionLoop:
+    ;incrementa o valor no registrador x duas vezes porque usamos dois bytes para salvar
+    ;as coordenadas da cabeça e do corpo
+    inx              ;incrementa o registrador x
+    inx              ;incrementa o registrador x
+    cpx snakeLength  ;compara o valor do registrador x com o salvo no endereço $03
+    beq didntCollide ;se igual, iremos para o último pedaço da seção: didntCollide
+
+    ;se chegar aqui não verificamos todos os pedaços do corpo da cobra
+    jmp snakeCollisionLoop ;volta ao snakeCollisionLoop para continuar a interação
+
+  didCollide:
+    ;houve uma colisão
+    jmp gameOver ;pula para gameOver
+
+  didntCollide:
+    ;não houve colisão, segue o jogo
+    rts ;return
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina "updateSnake" é feita o reposicionamento da cobra baseado na direção que ela está seguindo e verificado es ela não bateu na parede.
+</p>
+<pre>
+  updateSnake:
+    ;verificações de colisão foram feitas, atualize a cobra. Carregue o tamanho da cobra
+    ;menos 1 no registrador A
+    ldx snakeLength ;carregando o valor no endereço $03
+    dex             ;decrementando o valor no registrador X
+    txa             ;transferindo o valor de X para o registrador A
+
+  updateloop:
+
+    ;Exemplo: o comprimento da cobra é 4 bytes(dois pedaços). Nas linhas acima
+    ;o registrador x foi decrementado pra 3. As coordenadas da cobra agora estão salvas assim:
+    ;$10,$11 : a cabeça da cobra
+    ;$12,$13,$14,$15: os pedaços do corpo da cobra (dois bytes para cada um dos pedaços)
+    ;
+    ;O laço vai mudar as coordenadas da cobra para dois lugares para frente na memória
+    ;calculando o offset da origem $10 e o local na memória do offset $12, assim
+    ;efetivamente movimentando cada segmento da cobra um bloco para frente:
+    ;
+    ;de:      x===
+    ;para:    ===
+    lda snakeHeadL,x     ;carrega o valor salvo no endereço $10 + x no registrador A
+    sta snakeBodyStart,x ;salva o valor do registrador a no endereço $12
+                         ;mais o valor do registrador x
+    dex                  ;decrementa x, e seta negativa a flag se o valor for negativo
+    bpl updateloop       ;volta ao inicio do laço se for positivo
+
+    ;agora precisamos determinar pra onde mover a cabeça, baseado na direção da cobra
+    ;lsr: Logical Shift Right. Muda todos os bits no registrador A um bit pra direita
+    ;o bit que "cair fora" é salvo na flag carry
+    lda snakeDirection
+    lsr       ;shift para direita
+    bcs up    ;se 1 "cair fora", iniciamos com o bin 0001, então a cobra precisa ir pra cima
+    lsr       ;shift para direita
+    bcs right ;se 1 "cair fora", encontramos o bin 0010, então a cobra precisa ir para direita
+    lsr       ;shift para direita
+    bcs down  ;se 1 "cair fora", encontramos o bin 0100, então a cobra precisa ir para baixo
+    lsr       ;shift para direita
+    bcs left  ;se 1 "cair fora", encontramos o bin 1000, então a cobra precisa ir para esquerda
+  up:
+    lda snakeHeadL ;pega o valor salvo no endereço $10 (o byte menos significativo, sendo a posição
+                   ;na faixa 8x32) no registrador A
+    sec            ;set carry flag
+    sbc #$20       ;Subtrai hexa $20 (dec 32) juntos com o NOT do bit da carry do registrador A.
+                   ;Se der overflow o bit da carry está limpo.
+                   ;Isso movimenta a cobra pra cima em uma linha na faixa e verifica overflow
+    sta snakeHeadL ;salva o valor do registrador A no enderço $10
+    bcc upup       ;Se a flag carry estiver limpa, nós tivemos um overflow pela subtração
+                   ;então precisamos mover para faixa acima da atual
+    rts            ;return
+  upup:
+    ;Deu overflow quando subtraímos 20 do byte menos significativo da cobra
+    dec snakeHeadH   ;decrementa o byte mais significativo da cabeça da cobra para mover a cabeça para
+                     ;a próxima faixa 8x32
+    lda #$1          ;carrega o valor hexa $1 (dec 1) para o registrador A
+    cmp snakeHeadH   ;compara com o valor no endereço $11, determinando em qual faixa estamos.
+                     ;Se for 1, então estamos na faixa do topo, pois a primeira faixa tem o byte
+                     ;mais significativo $02, então batemos com a borda superior
+
+    beq collision    ;Desvia caso bateu
+    rts              ;return
+  right:
+    inc snakeHeadL   ;Incrementa o valor no endereço $10 ( byte menos significativo da cabeça da cobra
+                     ;para determinar onde estamos na faixa de 8x32) para movermos a cabeça pra direita
+    lda #$1f         ;carrega o valor hexa $1f (dec 31) no registrador A
+    bit snakeHeadL   ;o valor salvo no endereço $10 (coordenada da cabeça da cobra) sofre um AND
+                     ;com o hexa $1f (bin 11111), significando que todos multiplos do hexa $20 (dec 32)
+                     ;serão zero (porque eles todos terminam com o padrão de bit com 5 zeros)
+                     ;se é zero então nós batemos na borda da direita
+    beq collision    ;desvia para colisão se a flag setá zerada
+    rts
+  down:
+    lda snakeHeadL
+    clc
+    adc #$20
+
+    sta snakeHeadL
+    bcs downdown
+
+    rts
+  downdown:
+    inc snakeHeadH   ;incrementa o valor do endereço hexa $11
+    lda #$6          ;carrega-se o hexa $6
+    cmp snakeHeadH   ;se o byte mais significativo for 6
+                     ;estamos uma faixa muito abaixo (a última era hexa $05)
+    beq collision    ;se igual 6, batemos com a borda de baixo
+    rts
+
+  left:
+    dec snakeHeadL   ;subtrai um do valor no endereço $10 para mover para esquerda
+    lda snakeHeadL   ;carrega o valor da posição de memória $10
+    and #$1f         ;AND do valor hexa $1f (bin 11111) com o valor no registrador A
+    cmp #$1f         ;a comparação do resultado acima com o binario 11111.
+    beq collision    ;se for igual, deu colisão
+    rts
+  collision:
+    jmp gameOver ;pula para o gameOver
+</pre>
+<p style="text-align: justify;">
+  As sub-rotinas "drawApple" e "drawSnake" são as responsáveis por desenhar a maçã e a cobra na tela do jogo.
+</p>
+<pre>
+  drawApple:
+    ldy #0       ;carrea 0 no registrador Y
+    lda sysRandom;carrega um número aleatório no registrador A
+    sta ($00),y  ;desreferencia o endereço salvo em $00 e $01
+                 ;(o endereço da maçã na tela) e seta o valor para
+                 ;o valor do registrador A e soma o valor de Y(0). Isso resulta
+                 ;na maçã recebendo uma cor aleatória
+    rts
+
+
+  drawSnake:
+    ldx snakeLength     ;salva 0 no registrador X
+    lda #0              ;salva 1 no registrador A
+    sta (snakeHeadL,x)  ;apaga o último pedaço do corpo da cobra
+
+
+    ldx #0              ;salva 0 no registrador X
+    lda #1              ;salva 1 no registrador A
+    sta (snakeHeadL,x)  ;desenha a cabeça da cobra
+
+    rts
+</pre>
+<p style="text-align: justify;">
+  Na sub-rotina "spinWheels" é desacelerado um pouco o jogo adicionando laços de atraso.
+</p>
+<pre>
+  spinWheels:
+    ;desperdiça ciclos do processador para desacelerar o jogo
+    ldx #0       ;carrega 0 no registrador X
+  spinloop:
+    nop          ;no operation, pula um ciclo
+    nop          ;no operation, pula um ciclo
+    dex          ;subtrai 1 do valor armazenado no registrador x
+    bne spinloop ;se a flag zero está limpa, reinicia. A primeira volta decrementa 1 de 0
+                 ;então o byte virou 255 e levará 255 decrementos pra virar 0 e sair do laço
+    rts
+</pre>
+<p style="text-align: justify;">
+  Por último mas não menos importante está a subrotina que encerra o programa: GameOver.
+</p>
+<pre>
+  gameOver: ;literalmente o fim do programa
+</pre>
+
+
+
+
+
+
+
+
+<p style="text-align: justify;">
+  Mais detalhes em:
+</p>
+<ul>
+  <li><a href="http://skilldrick.github.io/easy6502/#snake" target="_blank">Easy 6502 - Snake6502</a></li>
+  <li><a href="https://gist.github.com/wkjagt/9043907" target="_blank">Snake6502 - By wkjagt</a></li>
+</ul>

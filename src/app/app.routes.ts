@@ -8,14 +8,16 @@ import { Easy6502FormComponent } from './easy6502/easy6502-form/easy6502-form.co
 import { LoginFormComponent } from './autenticacao/login-form/login-form.component';
 // import { PageNotFoundComponent } from './html/page-not-found/page-not-found.component';
 import { DocumentacaoComponent } from './easy6502/documentacao/documentacao.component';
+import { Snake6502Component } from './easy6502/snake6502/snake6502.component';
 
 export const appRoutes: Routes = [
-  { path: 'inicio', component: JogoFormComponent},
+  { path: 'inicio', component: Easy6502FormComponent},
   { path: 'documentacao', component: DocumentacaoComponent},
+  { path: 'snake6502', component: Snake6502Component},
   { path: 'login', component: LoginFormComponent, canActivate: [AutenticacaoGuard] },
   { path: 'login/:mensagemDeErro', component: LoginFormComponent, canActivate: [AutenticacaoGuard] },
   { path: 'cadastrar', component: CadastroFormComponent, canActivate: [AutenticacaoGuard] },
-  // { path: 'jogos/novo', component: JogoFormComponent, canActivate: [AutenticadoGuard] },
+  { path: 'jogos/novo', component: JogoFormComponent, canActivate: [AutenticadoGuard] },
   { path: 'jogos/editar', component: JogoFormComponent, canActivate: [AutenticadoGuard] },
   { path: 'jogos', component: JogoListComponent, canActivate: [AutenticadoGuard] },
   { path: '', redirectTo: 'inicio', pathMatch: 'full'},
